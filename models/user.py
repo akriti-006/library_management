@@ -17,6 +17,7 @@ class User(Base):
     is_staff: Mapped[str] = mapped_column(Boolean, default=False)
     created_at: Mapped[str] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[str] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     borrow_records = relationship( "BorrowRecord", back_populates="member", cascade="all, delete-orphan" )
     

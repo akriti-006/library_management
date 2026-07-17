@@ -11,7 +11,7 @@ class Book(Base):
     __tablename__= "books"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    title: Mapped[int] = mapped_column(String(255), nullable=False)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
     isbn: Mapped[str] = mapped_column(String(13), unique=True, nullable=False)
     author_id: Mapped[int] = mapped_column(ForeignKey("authors.id"), nullable=False)
