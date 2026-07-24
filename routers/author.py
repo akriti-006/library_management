@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -9,6 +9,8 @@ from schemas.author import (
 )
 
 from services import author as author_service
+from dependencies import get_current_user
+from models.user import User
 
 router = APIRouter(
     prefix="/authors",
@@ -19,24 +21,27 @@ router = APIRouter(
 @router.post("/", response_model=AuthorResponse)
 def create_author(
     author: AuthorCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    return author_service.create_author(db, author)
+    return author_service.create_author(db, author, current_user=current_user)
 
 
 @router.get("/", response_model=list[AuthorResponse])
 def get_authors(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    return author_service.get_all_authors(db)
+    return author_service.get_all_authors(db, current_user=current_user)
 
 
 @router.get("/{author_id}", response_model=AuthorResponse)
 def get_author(
     author_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    author = author_service.get_author_by_id(db, author_id)
+    author = author_service.get_author_by_id(db, author_id, current_user=current_user)
 
     if author is None:
         raise HTTPException(
@@ -51,9 +56,10 @@ def get_author(
 def update_author(
     author_id: int,
     author_data: AuthorUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    author = author_service.get_author_by_id(db, author_id)
+    author = author_service.get_author_by_id(db, author_id, current_user=current_user)
 
     if author is None:
         raise HTTPException(
@@ -72,9 +78,10 @@ def update_author(
 def partial_update_author(
     author_id: int,
     author_data: AuthorUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    author = author_service.get_author_by_id(db, author_id)
+    author = author_service.get_author_by_id(db, author_id, current_user=current_user)
 
     if author is None:
         raise HTTPException(
@@ -92,9 +99,10 @@ def partial_update_author(
 @router.delete("/{author_id}")
 def delete_author(
     author_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
-    author = author_service.get_author_by_id(db, author_id)
+    author = author_service.get_author_by_id(db, author_id, current_user=current_user)
 
     if author is None:
         raise HTTPException(

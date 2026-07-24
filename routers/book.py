@@ -15,6 +15,8 @@ from exceptions import (
     NotFoundException,
     ValidationException
 )
+from dependencies import get_current_user
+from models.user import User
 
 router = APIRouter(
     prefix="/books",
@@ -26,9 +28,10 @@ router = APIRouter(
 def create_book(
     book: BookCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     try:
-        return book_service.create_book(db, book)
+        return book_service.create_book(db, book, current_user=current_user)
 
     except AlreadyExistsException as e:
         raise HTTPException(
@@ -53,7 +56,9 @@ def create_book(
 def get_books(
     search: str | None = None,
     author_id: int | None = None,
-    category_id: int | None = None,
+    category: str | None = None,
+    available: bool | None = None,
+    sort: str | None = None,
     page: int = 1,
     limit: int = 10,
     db: Session = Depends(get_db),
@@ -62,7 +67,9 @@ def get_books(
         db=db,
         search=search,
         author_id=author_id,
-        category_id=category_id,
+        category=category,
+        available=available,
+        sort=sort,
         page=page,
         limit=limit,
     )
@@ -92,12 +99,14 @@ def update_book(
     book_id: int,
     book: BookUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     try:
         return book_service.update_book(
             db=db,
             book_id=book_id,
             book_data=book,
+            current_user=current_user
         )
 
     except AlreadyExistsException as e:
@@ -124,12 +133,14 @@ def partial_update_book(
     book_id: int,
     book: BookPartialUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     try:
         return book_service.partial_update_book(
             db=db,
             book_id=book_id,
             book_data=book,
+            current_user=current_user
         )
 
     except AlreadyExistsException as e:
@@ -155,11 +166,13 @@ def partial_update_book(
 def delete_book(
     book_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     try:
         book_service.delete_book(
             db=db,
             book_id=book_id,
+            current_user=current_user
         )
 
         return {

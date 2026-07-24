@@ -132,18 +132,24 @@ def get_all_books(
     db: Session,
     search: str | None = None,
     author_id: int | None = None,
-    category_id: int | None = None,
+    category: str | None = None,
+    available: bool | None = None,
+    sort: str | None = None,
     page: int = 1,
     limit: int = 10,
 ):
-    query = db.query(Book)
+    query = (
+        db.query(Book)
+        .join(Book.author)
+    )
 
-    # Search by title or ISBN
+    # Search by title, ISBN, or author name
     if search:
         query = query.filter(
             or_(
                 Book.title.ilike(f"%{search}%"),
                 Book.isbn.ilike(f"%{search}%"),
+                Author.name.ilike(f"%{search}%"),
             )
         )
 
@@ -153,11 +159,29 @@ def get_all_books(
             Book.author_id == author_id
         )
 
-    # Filter by category
-    if category_id:
+    # Filter by category slug
+    if category:
         query = query.filter(
-            Book.categories.any(id=category_id)
+            Book.categories.any(
+                Category.slug == category
+            )
         )
+
+    # Filter available books
+    if available:
+        query = query.filter(
+            Book.available_copies > 0
+        )
+
+    # Sorting
+    if sort == "title":
+        query = query.order_by(Book.title.asc())
+
+    elif sort == "newest":
+        query = query.order_by(Book.created_at.desc())
+
+    elif sort == "oldest":
+        query = query.order_by(Book.created_at.asc())
 
     # Pagination
     offset = (page - 1) * limit

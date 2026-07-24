@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict, Field
+from schemas.category import CategoryResponse
 
 
 class BookCreate(BaseModel):
@@ -56,6 +57,7 @@ class BookResponse(BaseModel):
     total_copies: int
     available_copies: int
     published_year: int | None
+    categories: list[CategoryResponse]
     model_config = ConfigDict(
         from_attributes=True
     )

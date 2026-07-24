@@ -8,6 +8,8 @@ from schemas.category import (
     CategoryResponse,
 )
 from services import category as category_service
+from models.user import User
+from dependencies import get_current_user
 
 router = APIRouter(
     prefix="/categories",
@@ -19,10 +21,10 @@ router = APIRouter(
 def create_category(
     category: CategoryCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     new_category = category_service.create_category(
-        db,
-        category,
+        db, category, current_user=current_user
     )
 
     if new_category is None:
@@ -65,10 +67,10 @@ def update_category(
     category_id: int,
     category_data: CategoryUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     category = category_service.get_category_by_id(
-        db,
-        category_id,
+        db, category_id, current_user=current_user
     )
 
     if category is None:
@@ -81,6 +83,7 @@ def update_category(
         db,
         category,
         category_data,
+        current_user=current_user
     )
 
 
@@ -89,10 +92,12 @@ def partial_update_category(
     category_id: int,
     category_data: CategoryUpdate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     category = category_service.get_category_by_id(
         db,
         category_id,
+        current_user=current_user
     )
 
     if category is None:
@@ -112,10 +117,12 @@ def partial_update_category(
 def delete_category(
     category_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ):
     category = category_service.get_category_by_id(
         db,
         category_id,
+        current_user=current_user
     )
 
     if category is None:
